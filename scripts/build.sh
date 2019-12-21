@@ -22,8 +22,6 @@ checkVar()
 #####################################
 #### MAIN 		
 #####################################
-module_id="my_module"
-target_folder="release"
 
 while getopts 'ha:c:i:n:r:t:' opt 
 do
@@ -37,7 +35,7 @@ do
   esac
 done
 
-checkVar "build_id build_number module_id target_repo arty_id"
+checkVar "build_id build_number target_repo arty_id"
 
 echo "[INFO] pinging Artifactory ..."
 jfrog rt c show

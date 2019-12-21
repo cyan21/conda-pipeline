@@ -1,0 +1,79 @@
+pipeline {
+    
+    agent none
+    
+    environment {
+        JFROG_CLI_HOME="/opt/jfrog"
+        ARTY_URL='http://192.168.41.41:8081/artifactory'
+        ARTY_USER='admin'
+        ARTY_APIKEY='AKCp5btpCwjQnQr3QSZv7XK7i7W7Yf1BXyzdXqsUKPePDHqYE3HLDPHdF9F7spexvso3sNJSN'
+        ARTY_MAIN_REPO="asgardian-pypi"
+        MODULE_NAME="python-example"
+        ARTY_ID="art6"
+        TARGET_FOLDER="release"
+    }
+
+    parameters {
+        string(name: 'promotion_repo', defaultValue: 'asgardian-pypi-int-local', description: 'target repo for promotion')
+        booleanParam(name: 'scan_build', defaultValue: false, description: 'Xray scan')
+        string(name: 'agent', defaultValue: 'linux', description: 'Jenkins agent name')
+    }
+    
+    stages {
+        
+        stage("Config env") {
+           agent { label params.agent }
+           steps {
+                git credentialsId: 'cyan21', branch: 'master', url: 'https://github.com/cyan21/python-greetings.git'
+                
+                sh "cp CI/JenkinsBuild/withDocker/Dockerfile . " 
+           }
+        }
+
+        stage("Build package") {
+           agent { label params.agent dockerfile {
+                   additionalBuildArgs  "--build-arg ARTY_URL=${env.ARTY_URL} --build-arg ARTY_USER=${env.ARTY_USER} --build-arg ARTY_APIKEY=${env.ARTY_APIKEY} --build-arg ARTY_ID=${env.ARTY_ID}" 
+               }
+           }
+           steps {
+                sh '''
+                    pip -V
+                    jfrog --version
+                    sed -i "s/2.3.0/2.12.4/" requirements.txt
+                    echo $JFROG_CLI_HOME 
+                    conda info
+                    scripts/init.sh -r $ARTY_MAIN_REPO -s $ARTY_ID
+                    scripts/build.sh -i $JOB_NAME -n $BUILD_NUMBER -t release -r $ARTY_MAIN_REPO -a $ARTY_ID -m $MODULE_NAME 
+                '''
+
+            }
+        }
+
+        stage ('Xray scan') {
+           when { 
+               expression { return params.scan_build } 
+           }
+           agent { label params.agent dockerfile {
+                   additionalBuildArgs  "--build-arg ARTY_URL=${env.ARTY_URL} --build-arg ARTY_USER=${env.ARTY_USER} --build-arg ARTY_APIKEY=${env.ARTY_APIKEY} --build-arg ARTY_ID=${env.ARTY_ID}" 
+               }
+           }
+           steps {
+               sh "jfrog rt bs --fail=false $JOB_NAME $BUILD_ID"
+           }
+
+       }
+        
+        stage('Promote Build Info') {
+           agent { label params.agent dockerfile {
+                   additionalBuildArgs  "--build-arg ARTY_URL=${env.ARTY_URL} --build-arg ARTY_USER=${env.ARTY_USER} --build-arg ARTY_APIKEY=${env.ARTY_APIKEY} --build-arg ARTY_ID=${env.ARTY_ID}" 
+               }
+           }
+            steps {
+                echo "Performing promotion ..."
+                
+                sh "jfrog rt bpr --comment='passed non regression tests' $JOB_NAME $BUILD_ID ${params.promotion_repo}"
+            }    
+        }
+
+    } // end stages
+}       
