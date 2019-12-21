@@ -22,7 +22,7 @@ RUN jfrog rt c --interactive=false --url=$ARTY_URL --user=$ARTY_USER --apikey=$A
 RUN jfrog rt use $ARTY_ID
 
 # hack
-RUN chmod 777 -R  /opt/conda/pkgs /opt/jfrog
+RUN mkdir -p /opt/conda/pkgs && chmod 777 -R /opt/conda/pkgs /opt/jfrog
 
 CMD ["/bin/bash", "-c", "jfrog rt c show"]
 
