@@ -18,7 +18,7 @@ condarc_file=/root/.condarc
 while getopts 'hc:k:l:r:u:' opt 
 do
   case $opt in
-    k) condarc_path=$OPTARG;;
+    k) condarc_file=$OPTARG;;
     k) art_apikey=$OPTARG;;
     l) 
        art_host=`echo $OPTARG | cut -d"/" -f 3,4` 
