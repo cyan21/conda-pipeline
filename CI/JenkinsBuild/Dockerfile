@@ -8,6 +8,7 @@ ARG ARTY_ID
 ARG PKG_CACHE=/opt/conda/pkgs
 ENV JFROG_CLI_OFFER_CONFIG=false
 ENV JFROG_CLI_HOME=/opt/jfrog 
+ENV HOME=/opt/jfrog 
 
 RUN mkdir /opt/jfrog
 WORKDIR /opt/jfrog
@@ -21,7 +22,7 @@ RUN jfrog rt c --interactive=false --url=$ARTY_URL --user=$ARTY_USER --apikey=$A
 RUN jfrog rt use $ARTY_ID
 
 # hack
-RUN chmod 777 -R /opt/jfrog
+RUN chmod 777 -R  /opt/conda/pkgs /opt/jfrog
 
 CMD ["/bin/bash", "-c", "jfrog rt c show"]
 
