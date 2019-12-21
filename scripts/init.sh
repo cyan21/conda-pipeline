@@ -33,12 +33,12 @@ conda config --remove channels defaults
 
 conda info 
 
-cat <<EOF > $condarc_file
+cat <<EOF > $condarc_file/.condarc
 auto_activate_base: false
 default_channels:
   - ${protocol}://${art_user}:${art_apikey}@${art_host}/api/conda/${repo_name}
 EOF
 
-cat $condarc_file 
+cat $condarc_file/.condarc
 
 conda info
