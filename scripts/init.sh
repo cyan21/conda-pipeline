@@ -3,7 +3,7 @@
 usage()
 {
   echo "=============================================================="
-  echo -e "Usage:\n\t $0 -u user -k apikey -l host -r repo"
+  echo -e "Usage:\n\t $0 -u user -k apikey -l host -r repo -c condarc_file"
   echo "=============================================================="
   echo -e "\t - user : Artifactory user"
   echo -e "\t - apikey : User's apikey"
@@ -13,9 +13,12 @@ usage()
   exit 2
 }
 
-while getopts 'hk:l:r:u:' c
+condarc_file=/root/.condarc
+
+while getopts 'hc:k:l:r:u:' opt 
 do
-  case $c in
+  case $opt in
+    k) condarc_path=$OPTARG;;
     k) art_apikey=$OPTARG;;
     l) 
        art_host=`echo $OPTARG | cut -d"/" -f 3,4` 
@@ -25,9 +28,6 @@ do
     h) usage ;;
   esac
 done
-
-condarc_file=/root/.condarc
-#condarc_file=/tmp/condarc
 
 conda config --remove channels defaults
 
