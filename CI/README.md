@@ -13,7 +13,7 @@ docker build -t conda-build:1.0 --rm  \
 CI/DockerBuild/ 
 ```
 
-*Run
+* Run
 
 ```
 docker run -ti --rm conda-build:1.0
@@ -26,8 +26,8 @@ docker run -ti --rm conda-build:1.0
 credentials: create art_apikey creds (user/apikey) 
 
 node(s) : 
-1/ tagged with "linux" label and Docker installed 
-2/ tagged with "jfrog_cli" label and JFrog CLI installed 
+* tagged with "linux" label and Docker installed 
+* tagged with "jfrog_cli" label and JFrog CLI installed 
 
 
 * Run
