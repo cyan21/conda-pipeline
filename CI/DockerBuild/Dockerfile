@@ -1,16 +1,23 @@
 FROM continuumio/miniconda3:4.7.12 
 LABEL maintainer="yannc@jfrog.com"
 
-ENV BUILD_NAME='test_conda'
-ENV BUILD_NUMBER=1
+ARG ARTY_URL
+ARG ARTY_USER
+ARG ARTY_APIKEY
 
-ENV ARTY_URL='http://192.168.41.41:8081/artifactory'
-ENV ARTY_USER='<CHANGE_ME>'
-ENV ARTY_APIKEY='<CHANGE_ME>'
-ENV ARTY_MAIN_REPO='eva-conda'
-ENV ARTY_ID='art6'
+ARG BUILD_NAME='test_conda'
+ARG BUILD_NUMBER='1'
+ARG ARTY_MAIN_REPO='eva-conda'
+
+# hack to pass variables to ENTRYPOINT
+ENV B_NAME=$BUILD_NAME
+ENV B_NUMBER=$BUILD_NUMBER
+ENV ART_REPO=$ARTY_MAIN_REPO
+
 ENV PKG_CACHE=/opt/conda/pkgs
+ENV ARTY_ID='art'
 ENV JFROG_CLI_OFFER_CONFIG=false
+
 
 WORKDIR /tmp
 
@@ -26,4 +33,4 @@ RUN chmod u+x conda-pipeline/scripts/init.sh conda-pipeline/scripts/build.sh
 
 RUN conda-pipeline/scripts/init.sh -u $ARTY_USER -k $ARTY_APIKEY -l $ARTY_URL -r $ARTY_MAIN_REPO 
 
-ENTRYPOINT ["/bin/bash", "-c", "cd conda-pipeline && scripts/build.sh -i $BUILD_NAME -n $BUILD_NUMBER -c $PKG_CACHE -r $ARTY_MAIN_REPO -a $ARTY_ID"]
+ENTRYPOINT ["/bin/bash", "-c", "cd conda-pipeline && scripts/build.sh -i $B_NAME -n $B_NUMBER -c $PKG_CACHE -r $ART_REPO -a $ARTY_ID"]
